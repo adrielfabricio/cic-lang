@@ -1,5 +1,5 @@
-import { HEX_DIGITS, LOWERCASE, NUMERIC, UPPERCASE } from "./constants";
-import { StateTransitions, Token } from "./types";
+import { HEX_DIGITS, LOWERCASE, NUMERIC, UPPERCASE } from "../utils/constants";
+import { StateTransitions, Token } from "../types/types";
 
 export const stateTransitions: StateTransitions = {
   q0: (char) => ({

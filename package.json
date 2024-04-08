@@ -1,0 +1,17 @@
+{
+	"name": "meu_compilador",
+	"version": "1.0.0",
+	"description": "Um compilador simples para demonstrar a implementação do token TK_END.",
+	"main": "dist/main.js",
+	"scripts": {
+		"build": "tsc",
+		"start": "npx tsx src/app.ts ./exemplo.cic"
+	},
+	"dependencies": {
+		"ts-node": "^9.1.1",
+		"typescript": "^4.1.3"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.2"
+	}
+}

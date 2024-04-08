@@ -62,7 +62,7 @@ cic-lang/
 │   └── app.ts                # Ponto de entrada da aplicação
 │
 ├── examples/                 # Exemplos de código na linguagem "cic"
-│   └── exemplo.cic
+│   └── tk_end.cic
 │
 ├── node_modules/             # Dependências do projeto
 │

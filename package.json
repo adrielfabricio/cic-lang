@@ -4,8 +4,7 @@
 	"description": "cic lang implementation",
 	"main": "dist/main.js",
 	"scripts": {
-		"build": "tsc",
-		"start": "npx tsx src/app.ts ./exemplo.cic"
+		"build": "tsc"
 	},
 	"dependencies": {
 		"ts-node": "^9.1.1",

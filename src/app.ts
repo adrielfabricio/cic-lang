@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { automaton } from "./core/automaton";
+import { initializeOutputFile } from "./utils/files";
 
 // Retrieve the input file path from command line arguments
 const inputFile = process.argv[2];
@@ -19,6 +20,10 @@ if (path.extname(inputFile) !== ".cic") {
 
 // Read the content of the input file
 const inputContent = fs.readFileSync(inputFile, "utf8");
+
+// Check if the outputs/ directory exists, if not, initialize the output file
+const outputDir = path.join(__dirname, "outputs");
+if (!fs.existsSync(outputDir)) initializeOutputFile();
 
 // Process the input content through the automaton
 const token = automaton.processInput(inputContent);

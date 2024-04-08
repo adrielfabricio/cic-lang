@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { automaton } from "./automaton";
+import { automaton } from "./core/automaton";
 
 // Retrieve the input file path from command line arguments
 const inputFile = process.argv[2];

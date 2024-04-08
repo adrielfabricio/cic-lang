@@ -1,5 +1,5 @@
 import { stateTransitions } from "./states";
-import { State, Token } from "./types";
+import { State, Token } from "../types/types";
 
 class Automaton {
   private currentState: State = "q0";

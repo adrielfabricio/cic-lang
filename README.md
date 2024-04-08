@@ -42,3 +42,31 @@ Execute seu programa `cic` com:
 ```bash
 ./cic.sh <filename>.cic
 ```
+
+## Estrutura do projeto
+
+```schema
+cic-lang/
+│
+├── src/                      # Código fonte do projeto
+│   ├── core/                 # Núcleo da implementação da linguagem
+│   │   ├── automaton.ts      # Autômato para análise sintática
+│   │   └── states.ts         # Estados utilizados pelo autômato
+│   │
+│   ├── utils/                # Utilitários gerais
+│   │   └── constants.ts      # Constantes globais
+│   │
+│   ├── types/                # Definições de tipos
+│   │   └── types.ts          # Tipos específicos da linguagem
+│   │
+│   └── app.ts                # Ponto de entrada da aplicação
+│
+├── examples/                 # Exemplos de código na linguagem "cic"
+│   └── exemplo.cic
+│
+├── node_modules/             # Dependências do projeto
+│
+├── package.json              # Metadados e scripts do projeto
+└── tsconfig.json             # Configuração do TypeScript
+
+```

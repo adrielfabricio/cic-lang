@@ -2,7 +2,7 @@
 
 # Verifica se um argumento de linha de comando foi fornecido
 if [ "$#" -ne 1 ]; then
-    echo "use: $0 <nome_do_arquivo>"
+    echo "use: $0 <filename>"
     exit 1
 fi
 

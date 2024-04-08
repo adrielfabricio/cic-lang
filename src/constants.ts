@@ -1,11 +1,6 @@
-const lowercase = "abcdefghijklmnopqrstuvwxyz";
-const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const numeric = "0123456789";
-const hexDigits = `${numeric}abcdefABCDEF`;
+import { Token } from "./types";
 
-export const constants = {
-  lowercase,
-  uppercase,
-  numeric,
-  hexDigits,
-};
+export const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+export const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+export const NUMERIC = "0123456789";
+export const HEX_DIGITS = `${NUMERIC}ABCDEF`;

@@ -1,7 +1,7 @@
 {
-	"name": "meu_compilador",
+	"name": "cic-lang",
 	"version": "1.0.0",
-	"description": "Um compilador simples para demonstrar a implementação do token TK_END.",
+	"description": "cic lang implementation",
 	"main": "dist/main.js",
 	"scripts": {
 		"build": "tsc",

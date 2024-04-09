@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
+import { existsSync, readFileSync } from "fs";
+import { extname, join } from "path";
 import { automaton } from "./core/automaton";
-import { initializeOutputFile } from "./utils/files";
+import { initializeOutputFiles } from "./utils/files";
 
 // Retrieve the input file path from command line arguments
 const inputFile = process.argv[2];
@@ -13,23 +13,20 @@ if (!inputFile) {
 }
 
 // Ensure the file has a .cic extension
-if (path.extname(inputFile) !== ".cic") {
+if (extname(inputFile) !== ".cic") {
   console.error("The input file must have a .cic extension.");
   process.exit(1);
 }
 
 // Read the content of the input file
-const inputContent = fs.readFileSync(inputFile, "utf8");
+const inputContent = readFileSync(inputFile, "utf8");
 
 // Check if the outputs/ directory exists, if not, initialize the output file
-const outputDir = path.join(__dirname, "outputs");
-if (!fs.existsSync(outputDir)) initializeOutputFile();
+const outputDir = join(__dirname, "outputs");
+if (!existsSync(outputDir)) initializeOutputFiles();
 
 // Process the input content through the automaton
-const token = automaton.processInput(inputContent);
-
-// Output the identified token
-console.log(`Identified token: ${token}`);
+automaton.processInput(inputContent);
 
 // Reset the automaton state for processing the next input
 automaton.reset();

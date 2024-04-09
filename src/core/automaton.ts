@@ -1,6 +1,10 @@
 import { stateTransitions } from "./states";
-import { State, Token } from "../types/types";
-import { writeTokenToFile, writeTokenUsageToFile } from "../utils/files";
+import { State, Token, Transition } from "../types/types";
+import {
+  writeErrorsToFile,
+  writeTokenToFile,
+  writeTokenUsageToFile,
+} from "../utils/files";
 
 /**
  * Classe que representa um autômato finito determinístico para reconhecimento de tokens.
@@ -12,6 +16,7 @@ class Automaton {
   private currentCol: number = 1;
   private currentValue: string = "";
   private tokenUsageCount: { [key in Token]?: number } = {};
+  private errors: string[] = [];
 
   /**
    * Reinicia o autômato para o estado inicial.
@@ -62,6 +67,10 @@ class Automaton {
     if (this.token === Token.TK_ID && this.currentState !== "q5") {
       this.token = Token.UNKNOWN;
       this.currentValue = "";
+    }
+
+    if (this.errors.length > 0) {
+      writeErrorsToFile(this.errors);
     }
 
     if (this.token !== Token.UNKNOWN) {

@@ -126,3 +126,16 @@ export function writeTokenUsageToFile(tokenUsage: { [key in Token]?: number }) {
     encoding: "utf-8",
   });
 }
+
+/**
+ * Escreve as mensagens de erro no arquivo error.txt.
+ * @param errors Array de mensagens de erro para serem escritas no arquivo.
+ */
+export function writeErrorsToFile(errors: string[]): void {
+  const outputPath = resolve(ROOT_DIR, "outputs");
+  const errorContent = errors.join("\n");
+
+  appendFileSync(join(outputPath, "error.txt"), errorContent, {
+    encoding: "utf-8",
+  });
+}

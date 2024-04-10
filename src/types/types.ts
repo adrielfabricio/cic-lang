@@ -1,4 +1,5 @@
-export type State = "q0" | "q1" | "q2" | "q3" | "q4" | "q5";
+import { State } from "../utils/enums";
+
 export enum Token {
   TK_INT = "TK_INT",
   TK_FLOAT = "TK_FLOAT",
@@ -13,5 +14,5 @@ export interface Transition {
 }
 
 export type StateTransitions = {
-  [key in State]: (char: string) => Transition;
+  [key in State]: (char: string, buffer?: string) => Transition;
 };

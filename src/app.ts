@@ -26,7 +26,9 @@ const outputDir = join(__dirname, "outputs");
 if (!existsSync(outputDir)) initializeOutputFiles();
 
 // Process the input content through the automaton
+console.time("automaton.processInput");
 automaton.processInput(inputContent);
+console.timeEnd("automaton.processInput");
 
 // Reset the automaton state for processing the next input
 automaton.reset();

@@ -1,5 +1,6 @@
 import { stateTransitions } from "./states";
-import { State, Token, Transition } from "../types/types";
+import { Token, Transition } from "../types/types";
+import { State } from "../utils/enums";
 import {
   writeErrorsToFile,
   writeTokenToFile,
@@ -10,7 +11,8 @@ import {
  * Classe que representa um autômato finito determinístico para reconhecimento de tokens.
  */
 class Automaton {
-  private currentState: State = "q0";
+  private previousState: State = State.Q0;
+  private currentState: State = State.Q0;
   private token: Token = Token.UNKNOWN;
   private currentRow: number = 1;
   private currentCol: number = 1;
@@ -22,12 +24,20 @@ class Automaton {
    * Reinicia o autômato para o estado inicial.
    */
   public reset(): void {
-    this.currentState = "q0";
+    this.previousState = State.Q0;
+    this.currentState = State.Q0;
     this.token = Token.UNKNOWN;
     this.currentRow = 1;
     this.currentCol = 1;
     this.currentValue = "";
     this.tokenUsageCount = {};
+    this.errors = [];
+  }
+
+  public setError(char: string): void {
+    this.errors.push(
+      `Lexical error: unrecognized character '${char}' at line: ${this.currentRow}, column: ${this.currentCol}`
+    );
   }
 
   /**
@@ -38,18 +48,26 @@ class Automaton {
   public processInput(input: string): Token {
     this.reset();
     let lastRecognizedToken: Token = Token.UNKNOWN;
+    let unrecognizedCharFlag: boolean = false;
 
     for (const char of input) {
       if (char === "\n") {
         this.currentRow++;
         this.currentCol = 1;
+        this.currentValue = "";
+
+        if (unrecognizedCharFlag) {
+          this.setError(char);
+          unrecognizedCharFlag = false;
+        }
       } else {
         this.currentCol++;
-        this.currentValue += char;
       }
+      this.currentValue += char;
 
       const transition = stateTransitions[this.currentState](char);
       this.currentState = transition.nextState;
+      console.info(transition);
 
       // Se um token foi reconhecido (diferente de UNKNOWN) e é diferente do último token reconhecido,
       // atualize a contagem de uso do token
@@ -61,17 +79,14 @@ class Automaton {
         lastRecognizedToken = transition.token;
         this.tokenUsageCount[this.token] =
           (this.tokenUsageCount[this.token] || 0) + 1;
+        unrecognizedCharFlag = false;
+      } else if (transition.token === Token.UNKNOWN && !unrecognizedCharFlag) {
+        unrecognizedCharFlag = true;
       }
     }
 
-    if (this.token === Token.TK_ID && this.currentState !== "q5") {
-      this.token = Token.UNKNOWN;
-      this.currentValue = "";
-    }
-
-    if (this.errors.length > 0) {
-      writeErrorsToFile(this.errors);
-    }
+    if (unrecognizedCharFlag) this.setError(this.currentValue.slice(-1));
+    if (this.errors.length > 0) writeErrorsToFile(this.errors);
 
     if (this.token !== Token.UNKNOWN) {
       writeTokenToFile({

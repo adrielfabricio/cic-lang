@@ -1,6 +1,6 @@
 import { stateTransitions } from "./states";
 import { Token, Transition } from "../types/types";
-import { State } from "../utils/enums";
+import { Error, State } from "../utils/enums";
 import {
   writeErrorsToFile,
   writeTokenToFile,
@@ -19,6 +19,8 @@ class Automaton {
   private currentValue: string = "";
   private tokenUsageCount: { [key in Token]?: number } = {};
   private errors: string[] = [];
+  // buffers
+  private rowBuffer: string = "";
 
   /**
    * Reinicia o autômato para o estado inicial.
@@ -32,11 +34,14 @@ class Automaton {
     this.currentValue = "";
     this.tokenUsageCount = {};
     this.errors = [];
+    this.rowBuffer = "";
   }
 
-  public setError(char: string): void {
+  public setError(error: Error): void {
     this.errors.push(
-      `Lexical error: unrecognized character '${char}' at line: ${this.currentRow}, column: ${this.currentCol}`
+      `[${this.currentRow}] ${this.rowBuffer}\n${"-".repeat(
+        this.currentCol
+      )}^\nErro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`
     );
   }
 
@@ -51,13 +56,15 @@ class Automaton {
     let unrecognizedCharFlag: boolean = false;
 
     for (const char of input) {
+      this.rowBuffer += char;
       if (char === "\n") {
         this.currentRow++;
         this.currentCol = 1;
         this.currentValue = "";
+        this.rowBuffer = "";
 
         if (unrecognizedCharFlag) {
-          this.setError(char);
+          this.setError(Error.UNRECOGNIZED_TOKEN);
           unrecognizedCharFlag = false;
         }
       } else {
@@ -85,20 +92,20 @@ class Automaton {
       }
     }
 
-    if (unrecognizedCharFlag) this.setError(this.currentValue.slice(-1));
+    if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
     if (this.errors.length > 0) writeErrorsToFile(this.errors);
+    else {
+      if (this.token !== Token.UNKNOWN) {
+        writeTokenToFile({
+          row: this.currentRow,
+          col: this.currentCol,
+          token: this.token,
+          value: this.currentValue,
+        });
+      }
 
-    if (this.token !== Token.UNKNOWN) {
-      writeTokenToFile({
-        row: this.currentRow,
-        col: this.currentCol,
-        token: this.token,
-        value: this.currentValue,
-      });
+      writeTokenUsageToFile(this.tokenUsageCount);
     }
-
-    writeTokenUsageToFile(this.tokenUsageCount);
-
     return this.token;
   }
 

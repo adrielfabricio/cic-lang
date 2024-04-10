@@ -9,7 +9,7 @@ export const stateTransitions: StateTransitions = {
       : LOWERCASE.includes(char)
       ? State.Q4
       : State.Q0,
-    token: Token.UNKNOWN,
+    token: LOWERCASE.includes(char) ? Token.TK_ID : Token.UNKNOWN,
   }),
   q1: (char) => ({
     nextState: char === "x" ? State.Q2 : State.Q0,

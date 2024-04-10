@@ -15,7 +15,7 @@ Implementação da linguagem cic, uma DSL para [inserir propósito]. Este guia a
 Clone o repositório.
 
 ```bash
-git clone [URL do repositório]
+git clone git@github.com:adrielfabricio/cic-lang.git
 cd cic-lang
 ```
 

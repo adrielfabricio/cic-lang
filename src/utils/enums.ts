@@ -15,4 +15,8 @@ enum State {
   Q5 = "q5",
 }
 
-export { Token, State };
+enum Error {
+  UNRECOGNIZED_TOKEN = "unrecognized token",
+}
+
+export { Token, State, Error };

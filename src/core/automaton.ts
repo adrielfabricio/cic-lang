@@ -85,7 +85,7 @@ class Automaton {
 
     for (const char of input) {
       this.rowBuffer += char;
-      if (char === "\n") {
+      if (char === "\n" || char === " ") {
         this.processCurrentToken();
         this.resetForNewLine();
       } else {
@@ -111,7 +111,9 @@ class Automaton {
       // Se um token foi reconhecido (diferente de UNKNOWN) e é diferente do último token reconhecido,
       // atualize a contagem de uso do token
       if (
-        (this.previousState === State.Q4 || this.previousState === State.Q5) &&
+        (this.previousState === State.Q3 ||
+          this.previousState === State.Q4 ||
+          this.previousState === State.Q5) &&
         this.currentState === State.Q0
       ) {
         this.token = transition.token;
@@ -155,15 +157,15 @@ class Automaton {
   }
 
   private processCurrentToken(): void {
-    if (this.token !== Token.UNKNOWN && this.currentTokenValue.length > 0) {
-      writeTokenToFile({
-        row: this.currentRow,
-        col: this.currentCol,
-        token: this.token,
-        value: this.currentTokenValue,
-      });
-      this.currentTokenValue = "";
-    }
+    // if (this.token !== Token.UNKNOWN && this.currentTokenValue.length > 0) {
+    writeTokenToFile({
+      row: this.currentRow,
+      col: this.currentCol,
+      token: this.token,
+      value: this.currentTokenValue,
+    });
+    this.currentTokenValue = "";
+    // }
   }
 
   /**

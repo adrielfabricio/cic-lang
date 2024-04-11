@@ -18,11 +18,11 @@ class Automaton {
   private currentCol: number = 1;
   private currentValue: string = "";
   private tokenUsageCount: { [key in Token]?: number } = {};
-  private errors: string[] = [];
   private currentTokenValue: string = "";
   // buffers
   private rowBuffer: string = "";
-  // error pointers
+  // error
+  private errors: string[] = [];
   public errorPointers: string[] = [];
   public errorMessages: string[] = [];
   private currentLine: string = "";
@@ -44,6 +44,8 @@ class Automaton {
     this.errorPointers = [];
     this.errorMessages = [];
     this.currentLine = "";
+    this.iterationWithError = false;
+    this.currentTokenValue = "";
   }
 
   /**
@@ -57,10 +59,9 @@ class Automaton {
     let unrecognizedCharFlag: boolean = false;
 
     for (const char of input) {
-      console.log("<><><><><>");
       this.iterationWithError = false;
-      console.log(this.tokenUsageCount);
       this.rowBuffer += char;
+
       if (char === "\n" || char === " ") {
         this.processCurrentToken();
         if (char === "\n") this.resetForNewLine();
@@ -80,47 +81,37 @@ class Automaton {
         unrecognizedCharFlag = false;
       }
 
-      const transition = stateTransitions[this.currentState](char);
-      this.previousState = this.currentState;
-      this.currentState = transition.nextState;
-      console.log(transition);
-      if (
-        (this.currentState === State.Q4 && transition.nextState !== State.Q5) ||
-        (this.previousState === State.Q4 && transition.nextState === State.Q0)
-      ) {
-        console.log("aqui");
-        this.setError(Error.UNRECOGNIZED_TOKEN);
-      }
+      if (char !== " ") {
+        const transition = stateTransitions[this.currentState](char);
+        this.previousState = this.currentState;
+        this.currentState = transition.nextState;
 
-      if (
-        (this.previousState === State.Q3 ||
-          this.previousState === State.Q4 ||
-          this.previousState === State.Q5) &&
-        this.currentState === State.Q0
-      ) {
-        this.token = transition.token;
-        lastRecognizedToken = transition.token;
-        unrecognizedCharFlag = false;
-        console.log("1 if " + this.iterationWithError);
-        this.setTokenUsageCount(this.token);
-      } else if (transition.token !== Token.UNKNOWN) {
-        this.token = transition.token;
-      } else if (!unrecognizedCharFlag) {
-        unrecognizedCharFlag = true;
+        if (
+          (this.currentState === State.Q4 &&
+            transition.nextState !== State.Q5) ||
+          (this.previousState === State.Q4 && transition.nextState === State.Q0)
+        ) {
+          this.setError(Error.UNRECOGNIZED_TOKEN);
+        }
+
+        if (
+          (this.previousState === State.Q3 ||
+            this.previousState === State.Q4 ||
+            this.previousState === State.Q5) &&
+          this.currentState === State.Q0
+        ) {
+          this.token = transition.token;
+
+          lastRecognizedToken = transition.token;
+          unrecognizedCharFlag = false;
+        } else if (transition.token !== Token.UNKNOWN) {
+          this.token = transition.token;
+        } else if (!unrecognizedCharFlag) {
+          unrecognizedCharFlag = true;
+        }
       }
-      console.log("<><><><><>\n");
     }
 
-    if (this.currentState === State.Q3) {
-      console.log("2 if " + this.iterationWithError);
-      this.setTokenUsageCount(Token.TK_END);
-    } else if (
-      this.currentState === State.Q4 ||
-      this.currentState === State.Q5
-    ) {
-      console.log("3 if " + this.iterationWithError);
-      this.setTokenUsageCount(Token.TK_ID);
-    }
     this.processCurrentToken();
 
     if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
@@ -180,12 +171,18 @@ class Automaton {
     this.currentCol++;
     this.currentValue = "";
     this.currentTokenValue = "";
-    this.rowBuffer = "";
   }
 
   private processCurrentToken(): void {
-    if (!this.iterationWithError) {
-      console.log(this.currentTokenValue);
+    if (
+      !this.iterationWithError &&
+      !(
+        this.token === Token.TK_ID &&
+        this.currentState === State.Q0 &&
+        this.previousState === State.Q4
+      )
+    ) {
+      this.setTokenUsageCount(this.token);
       writeTokenToFile({
         row: this.currentRow,
         col: this.currentCol,

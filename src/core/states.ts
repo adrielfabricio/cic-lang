@@ -2,6 +2,7 @@ import { HEX_DIGITS, LOWERCASE, NUMERIC, UPPERCASE } from "../utils/constants";
 import { StateTransitions, Token } from "../types/types";
 import { State } from "../utils/enums";
 
+// q0 -> q4 -> q5 -> q4 -> q5
 export const stateTransitions: StateTransitions = {
   q0: (char) => ({
     nextState: NUMERIC.includes(char)

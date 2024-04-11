@@ -1,5 +1,5 @@
 import { stateTransitions } from "./states";
-import { Token, Transition } from "../types/types";
+import { Token } from "../types/types";
 import { Error, State } from "../utils/enums";
 import {
   writeErrorsToFile,
@@ -26,6 +26,7 @@ class Automaton {
   public errorPointers: string[] = [];
   public errorMessages: string[] = [];
   private currentLine: string = "";
+  private iterationWithError: boolean = false;
 
   /**
    * Reinicia o autômato para o estado inicial.
@@ -38,39 +39,11 @@ class Automaton {
     this.currentCol = 1;
     this.currentValue = "";
     this.tokenUsageCount = {};
-    this.errors = [];
     this.rowBuffer = "";
-  }
-
-  public setError(error: Error): void {
-    const errorPointer = `    ${"-".repeat(this.currentCol - 2)}^`;
-    const errorMessage = `Erro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`;
-
-    this.errorPointers.push(errorPointer);
-    this.errorMessages.push(errorMessage);
-
-    if (this.currentLine !== `[${this.currentRow}]`) {
-      if (this.currentLine !== "") {
-        this.errors.push(
-          this.currentLine,
-          ...this.errorPointers,
-          ...this.errorMessages
-        );
-        this.errorPointers = [];
-        this.errorMessages = [];
-      }
-      this.currentLine = `[${this.currentRow}]`;
-    }
-  }
-
-  public finalizeErrors(): void {
-    if (this.currentLine !== "") {
-      this.errors.push(
-        `${this.currentLine} ${this.rowBuffer}`,
-        ...this.errorPointers,
-        ...this.errorMessages
-      );
-    }
+    this.errors = [];
+    this.errorPointers = [];
+    this.errorMessages = [];
+    this.currentLine = "";
   }
 
   /**
@@ -84,10 +57,14 @@ class Automaton {
     let unrecognizedCharFlag: boolean = false;
 
     for (const char of input) {
+      console.log("<><><><><>");
+      this.iterationWithError = false;
+      console.log(this.tokenUsageCount);
       this.rowBuffer += char;
       if (char === "\n" || char === " ") {
         this.processCurrentToken();
-        this.resetForNewLine();
+        if (char === "\n") this.resetForNewLine();
+        if (char === " ") this.resetForBlankSpace();
       } else {
         this.currentCol++;
         this.currentValue += char;
@@ -106,10 +83,15 @@ class Automaton {
       const transition = stateTransitions[this.currentState](char);
       this.previousState = this.currentState;
       this.currentState = transition.nextState;
-      console.info(transition);
+      console.log(transition);
+      if (
+        (this.currentState === State.Q4 && transition.nextState !== State.Q5) ||
+        (this.previousState === State.Q4 && transition.nextState === State.Q0)
+      ) {
+        console.log("aqui");
+        this.setError(Error.UNRECOGNIZED_TOKEN);
+      }
 
-      // Se um token foi reconhecido (diferente de UNKNOWN) e é diferente do último token reconhecido,
-      // atualize a contagem de uso do token
       if (
         (this.previousState === State.Q3 ||
           this.previousState === State.Q4 ||
@@ -118,27 +100,27 @@ class Automaton {
       ) {
         this.token = transition.token;
         lastRecognizedToken = transition.token;
-        this.tokenUsageCount[this.token] =
-          (this.tokenUsageCount[this.token] || 0) + 1;
         unrecognizedCharFlag = false;
+        console.log("1 if " + this.iterationWithError);
+        this.setTokenUsageCount(this.token);
       } else if (transition.token !== Token.UNKNOWN) {
         this.token = transition.token;
       } else if (!unrecognizedCharFlag) {
         unrecognizedCharFlag = true;
       }
+      console.log("<><><><><>\n");
     }
 
     if (this.currentState === State.Q3) {
-      this.tokenUsageCount[Token.TK_END] =
-        (this.tokenUsageCount[Token.TK_END] || 0) + 1;
+      console.log("2 if " + this.iterationWithError);
+      this.setTokenUsageCount(Token.TK_END);
     } else if (
       this.currentState === State.Q4 ||
       this.currentState === State.Q5
     ) {
-      this.tokenUsageCount[Token.TK_ID] =
-        (this.tokenUsageCount[Token.TK_ID] || 0) + 1;
+      console.log("3 if " + this.iterationWithError);
+      this.setTokenUsageCount(Token.TK_ID);
     }
-
     this.processCurrentToken();
 
     if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
@@ -150,22 +132,74 @@ class Automaton {
     return this.token;
   }
 
+  private setError(error: Error): void {
+    this.iterationWithError = true;
+    const errorPointer = `    ${"-".repeat(this.currentCol - 2)}^`;
+    const errorMessage = `Erro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`;
+
+    this.errorPointers.push(errorPointer);
+    this.errorMessages.push(errorMessage);
+
+    if (
+      this.token === Token.UNKNOWN &&
+      this.currentLine !== `[${this.currentRow}]`
+    ) {
+      if (this.currentLine !== "") {
+        this.errors.push(
+          this.currentLine,
+          ...this.errorPointers,
+          ...this.errorMessages
+        );
+        this.errorPointers = [];
+        this.errorMessages = [];
+      }
+      this.currentLine = `[${this.currentRow}]`;
+    }
+  }
+
+  private finalizeErrors(): void {
+    if (this.currentLine !== "") {
+      this.errors.push(
+        `${this.currentLine} ${this.rowBuffer}`,
+        ...this.errorPointers,
+        ...this.errorMessages
+      );
+    }
+  }
+
   private resetForNewLine(): void {
     this.currentRow++;
     this.currentCol = 1;
     this.currentValue = "";
     this.rowBuffer = "";
     this.currentTokenValue = "";
+    this.currentLine = "";
+  }
+
+  private resetForBlankSpace(): void {
+    this.currentCol++;
+    this.currentValue = "";
+    this.currentTokenValue = "";
+    this.rowBuffer = "";
   }
 
   private processCurrentToken(): void {
-    writeTokenToFile({
-      row: this.currentRow,
-      col: this.currentCol,
-      token: this.token,
-      value: this.currentTokenValue,
-    });
+    if (!this.iterationWithError) {
+      console.log(this.currentTokenValue);
+      writeTokenToFile({
+        row: this.currentRow,
+        col: this.currentCol,
+        token: this.token,
+        value: this.currentTokenValue,
+      });
+    }
     this.currentTokenValue = "";
+  }
+
+  private setTokenUsageCount(token: Token): void {
+    if (!this.iterationWithError) {
+      this.tokenUsageCount[token] = (this.tokenUsageCount[token] || 0) + 1;
+    }
   }
 
   /**

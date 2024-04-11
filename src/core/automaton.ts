@@ -21,6 +21,10 @@ class Automaton {
   private errors: string[] = [];
   // buffers
   private rowBuffer: string = "";
+  // error pointers
+  public errorPointers: string[] = [];
+  public errorMessages: string[] = [];
+  private currentLine: string = "";
 
   /**
    * Reinicia o autômato para o estado inicial.
@@ -38,11 +42,34 @@ class Automaton {
   }
 
   public setError(error: Error): void {
-    this.errors.push(
-      `[${this.currentRow}] ${this.rowBuffer}\n${"-".repeat(
-        this.currentCol
-      )}^\nErro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`
-    );
+    const errorPointer = `    ${"-".repeat(this.currentCol - 2)}^`;
+    const errorMessage = `Erro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`;
+
+    this.errorPointers.push(errorPointer);
+    this.errorMessages.push(errorMessage);
+
+    if (this.currentLine !== `[${this.currentRow}]`) {
+      if (this.currentLine !== "") {
+        this.errors.push(
+          this.currentLine,
+          ...this.errorPointers,
+          ...this.errorMessages
+        );
+        this.errorPointers = [];
+        this.errorMessages = [];
+      }
+      this.currentLine = `[${this.currentRow}]`;
+    }
+  }
+
+  public finalizeErrors(): void {
+    if (this.currentLine !== "") {
+      this.errors.push(
+        `${this.currentLine} ${this.rowBuffer}`,
+        ...this.errorPointers,
+        ...this.errorMessages
+      );
+    }
   }
 
   /**
@@ -62,17 +89,21 @@ class Automaton {
         this.currentCol = 1;
         this.currentValue = "";
         this.rowBuffer = "";
-
-        if (unrecognizedCharFlag) {
-          this.setError(Error.UNRECOGNIZED_TOKEN);
-          unrecognizedCharFlag = false;
-        }
       } else {
         this.currentCol++;
       }
       this.currentValue += char;
+      if (
+        unrecognizedCharFlag &&
+        (this.rowBuffer.length > 3 ||
+          (this.rowBuffer.length <= 2 && this.previousState === State.Q0))
+      ) {
+        this.setError(Error.UNRECOGNIZED_TOKEN);
+        unrecognizedCharFlag = false;
+      }
 
       const transition = stateTransitions[this.currentState](char);
+      this.previousState = this.currentState;
       this.currentState = transition.nextState;
       console.info(transition);
 
@@ -93,6 +124,8 @@ class Automaton {
     }
 
     if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
+    this.finalizeErrors();
+
     if (this.errors.length > 0) writeErrorsToFile(this.errors);
     else {
       if (this.token !== Token.UNKNOWN) {

@@ -121,6 +121,8 @@ class Automaton {
         this.tokenUsageCount[this.token] =
           (this.tokenUsageCount[this.token] || 0) + 1;
         unrecognizedCharFlag = false;
+      } else if (transition.token !== Token.UNKNOWN) {
+        this.token = transition.token;
       } else if (!unrecognizedCharFlag) {
         unrecognizedCharFlag = true;
       }
@@ -157,7 +159,6 @@ class Automaton {
   }
 
   private processCurrentToken(): void {
-    // if (this.token !== Token.UNKNOWN && this.currentTokenValue.length > 0) {
     writeTokenToFile({
       row: this.currentRow,
       col: this.currentCol,
@@ -165,7 +166,6 @@ class Automaton {
       value: this.currentTokenValue,
     });
     this.currentTokenValue = "";
-    // }
   }
 
   /**

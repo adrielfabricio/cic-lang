@@ -19,6 +19,7 @@ class Automaton {
   private currentValue: string = "";
   private tokenUsageCount: { [key in Token]?: number } = {};
   private errors: string[] = [];
+  private currentTokenValue: string = "";
   // buffers
   private rowBuffer: string = "";
   // error pointers
@@ -85,14 +86,14 @@ class Automaton {
     for (const char of input) {
       this.rowBuffer += char;
       if (char === "\n") {
-        this.currentRow++;
-        this.currentCol = 1;
-        this.currentValue = "";
-        this.rowBuffer = "";
+        this.processCurrentToken();
+        this.resetForNewLine();
       } else {
         this.currentCol++;
+        this.currentValue += char;
+        this.currentTokenValue += char;
       }
-      this.currentValue += char;
+
       if (
         unrecognizedCharFlag &&
         (this.rowBuffer.length > 3 ||
@@ -110,36 +111,59 @@ class Automaton {
       // Se um token foi reconhecido (diferente de UNKNOWN) e é diferente do último token reconhecido,
       // atualize a contagem de uso do token
       if (
-        transition.token !== Token.UNKNOWN &&
-        transition.token !== lastRecognizedToken
+        (this.previousState === State.Q4 || this.previousState === State.Q5) &&
+        this.currentState === State.Q0
       ) {
         this.token = transition.token;
         lastRecognizedToken = transition.token;
         this.tokenUsageCount[this.token] =
           (this.tokenUsageCount[this.token] || 0) + 1;
         unrecognizedCharFlag = false;
-      } else if (transition.token === Token.UNKNOWN && !unrecognizedCharFlag) {
+      } else if (!unrecognizedCharFlag) {
         unrecognizedCharFlag = true;
       }
     }
+
+    if (this.currentState === State.Q3) {
+      this.tokenUsageCount[Token.TK_END] =
+        (this.tokenUsageCount[Token.TK_END] || 0) + 1;
+    } else if (
+      this.currentState === State.Q4 ||
+      this.currentState === State.Q5
+    ) {
+      this.tokenUsageCount[Token.TK_ID] =
+        (this.tokenUsageCount[Token.TK_ID] || 0) + 1;
+    }
+
+    this.processCurrentToken();
 
     if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
     this.finalizeErrors();
 
     if (this.errors.length > 0) writeErrorsToFile(this.errors);
-    else {
-      if (this.token !== Token.UNKNOWN) {
-        writeTokenToFile({
-          row: this.currentRow,
-          col: this.currentCol,
-          token: this.token,
-          value: this.currentValue,
-        });
-      }
 
-      writeTokenUsageToFile(this.tokenUsageCount);
-    }
+    writeTokenUsageToFile(this.tokenUsageCount);
     return this.token;
+  }
+
+  private resetForNewLine(): void {
+    this.currentRow++;
+    this.currentCol = 1;
+    this.currentValue = "";
+    this.rowBuffer = "";
+    this.currentTokenValue = "";
+  }
+
+  private processCurrentToken(): void {
+    if (this.token !== Token.UNKNOWN && this.currentTokenValue.length > 0) {
+      writeTokenToFile({
+        row: this.currentRow,
+        col: this.currentCol,
+        token: this.token,
+        value: this.currentTokenValue,
+      });
+      this.currentTokenValue = "";
+    }
   }
 
   /**

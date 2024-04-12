@@ -1,13 +1,14 @@
 # cic-lang
 
-Implementação da linguagem cic, uma DSL para [inserir propósito]. Este guia ajuda a configurar e executar programas `cic`.
+Implementação da linguagem cic. Este guia ajuda a configurar e executar programas `cic`.
+Os tokens de retorno escolhidos foram o TK_END e TK_ID.
 
 ## Iniciando
 
 ### Pré-requisitos
 
-- Node.js
-- npm
+- node: v21.7.1
+- npm: v10.5.0
 - tsx (`npm install -g tsx`)
 
 ### Instalação
@@ -43,6 +44,14 @@ Execute seu programa `cic` com:
 ./cic.sh <filename>.cic
 ```
 
+## Observações gerais
+
+- Certifique-se de que todas as dependências foram instaladas com o comando `npm install` ou `yarn`;
+- A pasta `inputs/` contém exemplos que foram utilizadas para a concepção e teste do autômato, sinta-se livre para utilizar outros arquivos;
+- Ao executar o comando para rodar o autômato com o arquivo selecionado. Será criada uma pasta `outputs/` com os arquivos `.txt` necessários;
+- Certifique-se de que o `.sh` possui as permissões necessárias para a execução e para criação da pasta em sua máquina;
+- Todo o autômato foi concebido e testado em ambiente Linux.
+
 ## Estrutura do projeto
 
 ```schema
@@ -61,8 +70,19 @@ cic-lang/
 │   │
 │   └── app.ts                # Ponto de entrada da aplicação
 │
-├── inputs/                 # Inputs de código na linguagem "cic"
-│   └── tk_end.cic
+├── inputs/                   # Inputs de código na linguagem "cic"
+│   ├── tk_end.cic            # Arquivo simulando diversos TK_END
+│   │
+│   ├── tk_id.cic             # Arquivo simulando diversos TK_ID
+│   │
+│   └── tk_error.cic          # Arquivo simulando erro
+│
+├── outputs/                  # Outputs da execução do autômato
+│   ├── error.txt             # Arquivo contendo possíveis erros
+│   │
+│   ├── token_list.txt        # Arquivo com a lista dos tokens identificados
+│   │
+│   └── token_usage.txt       # Arquivo com a lista do uso dos tokens ordenado
 │
 ├── node_modules/             # Dependências do projeto
 │

@@ -55,7 +55,6 @@ class Automaton {
    */
   public processInput(input: string): Token {
     this.reset();
-    let lastRecognizedToken: Token = Token.UNKNOWN;
     let unrecognizedCharFlag: boolean = false;
 
     for (const char of input) {
@@ -85,25 +84,22 @@ class Automaton {
         const transition = stateTransitions[this.currentState](char);
         this.previousState = this.currentState;
         this.currentState = transition.nextState;
+        console.log(transition);
 
+        //! TODO: create a better way to handle this
         if (
-          (this.currentState === State.Q4 &&
-            transition.nextState !== State.Q5) ||
-          (this.previousState === State.Q4 && transition.nextState === State.Q0)
-        ) {
-          this.setError(Error.UNRECOGNIZED_TOKEN);
-        }
-
-        if (
-          (this.previousState === State.Q3 ||
-            this.previousState === State.Q4 ||
-            this.previousState === State.Q5) &&
-          this.currentState === State.Q0
+          (this.currentState === State.Q0 && this.previousState === State.Q5) || // TK_INT
+          (this.currentState === State.Q0 && this.previousState === State.Q1) || // TK_INT
+          (this.currentState === State.Q0 && this.previousState === State.Q2) || // TK_INT
+          (this.currentState === State.Q0 && this.previousState === State.Q3) || // TK_INT
+          (this.currentState === State.Q0 && this.previousState === State.Q4) || // TK_INT
+          (this.currentState === State.Q0 &&
+            this.previousState === State.Q14) || // TK_END
+          (this.currentState === State.Q0 && this.previousState === State.Q18) // TK_ID
         ) {
           this.token = transition.token;
-
-          lastRecognizedToken = transition.token;
           unrecognizedCharFlag = false;
+          console.log("<><><><><><><>");
         } else if (transition.token !== Token.UNKNOWN) {
           this.token = transition.token;
         } else if (!unrecognizedCharFlag) {
@@ -129,7 +125,8 @@ class Automaton {
    */
   private setError(error: Error): void {
     this.iterationWithError = true;
-    const errorPointer = `    ${"-".repeat(this.currentCol - 2)}^`;
+    const formatter = this.currentCol - 2 < 0 ? 0 : this.currentCol - 2;
+    const errorPointer = `    ${"-".repeat(formatter)}^`;
     const errorMessage = `Erro na linha ${this.currentRow} coluna ${this.currentCol}: ${error}`;
 
     this.errorPointers.push(errorPointer);
@@ -190,14 +187,7 @@ class Automaton {
    * Processa o token atual.
    */
   private processCurrentToken(): void {
-    if (
-      !this.iterationWithError &&
-      !(
-        this.token === Token.TK_ID &&
-        this.currentState === State.Q0 &&
-        this.previousState === State.Q4
-      )
-    ) {
+    if (!this.iterationWithError) {
       this.setTokenUsageCount(this.token);
       writeTokenToFile({
         row: this.currentRow,
@@ -207,6 +197,9 @@ class Automaton {
       });
     }
     this.currentTokenValue = "";
+    this.previousState = State.Q0;
+    this.currentState = State.Q0;
+    this.token = Token.UNKNOWN;
   }
 
   /**

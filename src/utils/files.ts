@@ -8,7 +8,7 @@ import {
 import { join, resolve } from "path";
 
 import { Token } from "../types/types";
-import { ROOT_DIR, TABLE_DIMENSIONS } from "./constants";
+import { ROOT_DIR, TABLE_DIMENSIONS } from "../config/constants";
 
 const SEPARATOR = "+----------+----------+------------+-------------+\n";
 

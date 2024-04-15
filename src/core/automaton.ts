@@ -123,6 +123,10 @@ class Automaton {
     return this.token;
   }
 
+  /**
+   * Define um erro ocorrido durante o processamento do arquivo.
+   * @param {Error} error - O objeto de erro ocorrido.
+   */
   private setError(error: Error): void {
     this.iterationWithError = true;
     const errorPointer = `    ${"-".repeat(this.currentCol - 2)}^`;
@@ -148,6 +152,9 @@ class Automaton {
     }
   }
 
+  /**
+   * Finaliza a lista de erros acumulados.
+   */
   private finalizeErrors(): void {
     if (this.currentLine !== "") {
       this.errors.push(
@@ -158,6 +165,9 @@ class Automaton {
     }
   }
 
+  /**
+   * Reseta os valores para uma nova linha.
+   */
   private resetForNewLine(): void {
     this.currentRow++;
     this.currentCol = 1;
@@ -167,12 +177,18 @@ class Automaton {
     this.currentLine = "";
   }
 
+  /**
+   * Reseta os valores para um espaço em branco.
+   */
   private resetForBlankSpace(): void {
     this.currentCol++;
     this.currentValue = "";
     this.currentTokenValue = "";
   }
 
+  /**
+   * Processa o token atual.
+   */
   private processCurrentToken(): void {
     if (
       !this.iterationWithError &&
@@ -193,6 +209,10 @@ class Automaton {
     this.currentTokenValue = "";
   }
 
+  /**
+   * Define a contagem de uso do token.
+   * @param token O token a ser contado.
+   */
   private setTokenUsageCount(token: Token): void {
     if (!this.iterationWithError) {
       this.tokenUsageCount[token] = (this.tokenUsageCount[token] || 0) + 1;

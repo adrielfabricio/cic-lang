@@ -105,6 +105,7 @@ export function writeTokenToFile(payload: {
 /**
  * Escreve a contagem de uso de cada token em um arquivo de saída.
  * @param tokenUsage A contagem de uso de cada token.
+ * !TODO: ordenate by quantity of usage
  */
 export function writeTokenUsageToFile(tokenUsage: { [key in Token]?: number }) {
   const outputPath = resolve(ROOT_DIR, "outputs");

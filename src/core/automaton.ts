@@ -71,11 +71,7 @@ class Automaton {
         this.currentTokenValue += char;
       }
 
-      if (
-        unrecognizedCharFlag &&
-        (this.rowBuffer.length > 3 ||
-          (this.rowBuffer.length <= 2 && this.previousState === State.Q0))
-      ) {
+      if (this.checkErrorState(unrecognizedCharFlag)) {
         this.setError(Error.UNRECOGNIZED_TOKEN);
         unrecognizedCharFlag = false;
       }
@@ -84,22 +80,10 @@ class Automaton {
         const transition = stateTransitions[this.currentState](char);
         this.previousState = this.currentState;
         this.currentState = transition.nextState;
-        console.log(transition);
 
-        //! TODO: create a better way to handle this
-        if (
-          (this.currentState === State.Q0 && this.previousState === State.Q5) || // TK_INT
-          (this.currentState === State.Q0 && this.previousState === State.Q1) || // TK_INT
-          (this.currentState === State.Q0 && this.previousState === State.Q2) || // TK_INT
-          (this.currentState === State.Q0 && this.previousState === State.Q3) || // TK_INT
-          (this.currentState === State.Q0 && this.previousState === State.Q4) || // TK_INT
-          (this.currentState === State.Q0 &&
-            this.previousState === State.Q14) || // TK_END
-          (this.currentState === State.Q0 && this.previousState === State.Q18) // TK_ID
-        ) {
+        if (this.checkAcceptanceState()) {
           this.token = transition.token;
           unrecognizedCharFlag = false;
-          console.log("<><><><><><><>");
         } else if (transition.token !== Token.UNKNOWN) {
           this.token = transition.token;
         } else if (!unrecognizedCharFlag) {
@@ -109,14 +93,27 @@ class Automaton {
     }
 
     this.processCurrentToken();
-
-    if (unrecognizedCharFlag) this.setError(Error.UNRECOGNIZED_TOKEN);
     this.finalizeErrors();
-
     if (this.errors.length > 0) writeErrorsToFile(this.errors);
-
     writeTokenUsageToFile(this.tokenUsageCount);
     return this.token;
+  }
+
+  private checkAcceptanceState(): boolean {
+    return (
+      (this.currentState === State.Q0 && this.previousState === State.Q5) || // TK_INT
+      (this.currentState === State.Q0 && this.previousState === State.Q10) || // TK_FLOAT
+      (this.currentState === State.Q0 && this.previousState === State.Q14) || // TK_END
+      (this.currentState === State.Q0 && this.previousState === State.Q18) // TK_ID
+    );
+  }
+
+  private checkErrorState(unrecognizedCharFlag: boolean): boolean {
+    return (
+      unrecognizedCharFlag &&
+      (this.rowBuffer.length > 3 ||
+        (this.rowBuffer.length <= 2 && this.previousState === State.Q0))
+    );
   }
 
   /**

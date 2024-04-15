@@ -12,9 +12,11 @@ export const stateTransitions: StateTransitions = {
     nextState: NUMERIC.includes(char)
       ? State.Q1
       : HEX_DIGITS.includes(char)
-      ? State.Q1
+      ? State.Q11
       : LOWERCASE.includes(char)
       ? State.Q15
+      : char === "."
+      ? State.Q6
       : State.Q0,
     token: NUMERIC.includes(char)
       ? Token.UNKNOWN
@@ -22,29 +24,65 @@ export const stateTransitions: StateTransitions = {
       ? Token.TK_ID
       : Token.UNKNOWN,
   }),
-  //! TODO: TK_FLOAT
   [State.Q1]: (char) => ({
     nextState:
-      char === "x" ? State.Q12 : !NUMERIC.includes(char) ? State.Q5 : State.Q2,
+      char === "x"
+        ? State.Q12
+        : char === "."
+        ? State.Q6
+        : !NUMERIC.includes(char)
+        ? State.Q5
+        : State.Q2,
     token: Token.UNKNOWN,
   }),
-  //! TODO: TK_FLOAT
   [State.Q2]: (char) => ({
-    nextState: !NUMERIC.includes(char) ? State.Q5 : State.Q3,
+    nextState:
+      char === "." ? State.Q6 : !NUMERIC.includes(char) ? State.Q5 : State.Q3,
     token: Token.TK_INT,
   }),
-  //! TODO: TK_FLOAT
   [State.Q3]: (char) => ({
-    nextState: !NUMERIC.includes(char) ? State.Q5 : State.Q4,
+    nextState:
+      char === "." ? State.Q6 : !NUMERIC.includes(char) ? State.Q5 : State.Q4,
     token: Token.TK_INT,
   }),
   [State.Q4]: (char) => ({
-    nextState: !NUMERIC.includes(char) ? State.Q5 : State.Q0,
+    nextState: !NUMERIC.includes(char) ? State.Q5 : State.Q4,
     token: Token.TK_INT,
   }),
+  // TK_INT acceptance state
   [State.Q5]: () => ({
     nextState: State.Q0,
     token: Token.TK_INT,
+  }),
+  [State.Q6]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q7 : State.Q0,
+    token: NUMERIC.includes(char) ? Token.TK_FLOAT : Token.UNKNOWN,
+  }),
+  [State.Q7]: (char) => ({
+    nextState:
+      char === "e" || char === "e-"
+        ? State.Q8
+        : !NUMERIC.includes(char)
+        ? State.Q10
+        : State.Q7,
+    token: Token.TK_FLOAT,
+  }),
+  [State.Q8]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q9 : State.Q0,
+    token: NUMERIC.includes(char) ? Token.TK_FLOAT : Token.UNKNOWN,
+  }),
+  [State.Q9]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q9 : State.Q10,
+    token: Token.TK_FLOAT,
+  }),
+  // TK_FLOAT acceptance state
+  [State.Q10]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_FLOAT,
+  }),
+  [State.Q11]: (char) => ({
+    nextState: char === "x" ? State.Q12 : State.Q0,
+    token: Token.UNKNOWN,
   }),
   [State.Q12]: (char) => ({
     nextState: HEX_DIGITS.includes(char) ? State.Q13 : State.Q0,
@@ -54,6 +92,7 @@ export const stateTransitions: StateTransitions = {
     nextState: HEX_DIGITS.includes(char) ? State.Q13 : State.Q14,
     token: Token.TK_END,
   }),
+  // TK_END acceptance state
   [State.Q14]: () => ({
     nextState: State.Q0,
     token: Token.TK_END,
@@ -70,6 +109,7 @@ export const stateTransitions: StateTransitions = {
     nextState: UPPERCASE.includes(char) ? State.Q16 : State.Q18,
     token: Token.TK_ID,
   }),
+  // TK_ID acceptance state
   [State.Q18]: () => ({
     nextState: State.Q0,
     token: Token.TK_ID,

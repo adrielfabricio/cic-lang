@@ -1,6 +1,5 @@
 import { stateTransitions } from "./states";
-import { Token } from "../types/types";
-import { Error, State } from "../utils/enums";
+import { Error, State, Token } from "../utils/enums";
 import {
   writeErrorsToFile,
   writeTokenToFile,
@@ -101,10 +100,12 @@ class Automaton {
 
   private checkAcceptanceState(): boolean {
     return (
-      (this.currentState === State.Q0 && this.previousState === State.Q5) || // TK_INT
-      (this.currentState === State.Q0 && this.previousState === State.Q10) || // TK_FLOAT
-      (this.currentState === State.Q0 && this.previousState === State.Q14) || // TK_END
-      (this.currentState === State.Q0 && this.previousState === State.Q18) // TK_ID
+      this.currentState === State.Q0 &&
+      (this.previousState === State.Q5 || // TK_INT
+        this.previousState === State.Q10 || // TK_FLOAT
+        this.previousState === State.Q14 || // TK_END
+        this.previousState === State.Q18 || // TK_ID
+        this.previousState === State.Q21) // TK_CADEIA
     );
   }
 

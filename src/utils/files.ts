@@ -1,13 +1,7 @@
-import {
-  appendFile,
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-} from "fs";
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 
-import { Token } from "../types/types";
+import { Token } from "./enums";
 import { ROOT_DIR, TABLE_DIMENSIONS } from "../config/constants";
 
 const SEPARATOR = "+----------+----------+------------+-------------+\n";

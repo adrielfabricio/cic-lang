@@ -3,6 +3,7 @@ enum Token {
   TK_FLOAT = "TK_FLOAT",
   TK_END = "TK_END",
   TK_ID = "TK_ID",
+  TK_CADEIA = "TK_CADEIA",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -26,6 +27,9 @@ enum State {
   Q16 = "q16",
   Q17 = "q17",
   Q18 = "q18",
+  Q19 = "q19",
+  Q20 = "q20",
+  Q21 = "q21",
 }
 
 enum Error {

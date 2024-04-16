@@ -1,12 +1,4 @@
-import { State } from "../utils/enums";
-
-export enum Token {
-  TK_INT = "TK_INT",
-  TK_FLOAT = "TK_FLOAT",
-  TK_END = "TK_END",
-  TK_ID = "TK_ID",
-  UNKNOWN = "UNKNOWN",
-}
+import { State, Token } from "../utils/enums";
 
 export interface Transition {
   nextState: State;

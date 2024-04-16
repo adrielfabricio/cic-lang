@@ -1,6 +1,6 @@
 import { HEX_DIGITS, LOWERCASE, NUMERIC, UPPERCASE } from "../config/constants";
-import { StateTransitions, Token } from "../types/types";
-import { State } from "../utils/enums";
+import { StateTransitions } from "../types/types";
+import { State, Token } from "../utils/enums";
 
 /**
  * INITIAL_STATE: Q0
@@ -17,6 +17,8 @@ export const stateTransitions: StateTransitions = {
       ? State.Q15
       : char === "."
       ? State.Q6
+      : char === '"'
+      ? State.Q19
       : State.Q0,
     token: NUMERIC.includes(char)
       ? Token.UNKNOWN
@@ -113,5 +115,22 @@ export const stateTransitions: StateTransitions = {
   [State.Q18]: () => ({
     nextState: State.Q0,
     token: Token.TK_ID,
+  }),
+  [State.Q19]: (char) => ({
+    nextState: LOWERCASE.includes(char.toLowerCase()) ? State.Q20 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q20]: (char) => ({
+    nextState: LOWERCASE.includes(char.toLowerCase())
+      ? State.Q20
+      : char === '"'
+      ? State.Q21
+      : State.Q0,
+    token: char === '"' ? Token.TK_CADEIA : Token.UNKNOWN,
+  }),
+  // TK_CADEIA acceptance state
+  [State.Q21]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_CADEIA,
   }),
 };

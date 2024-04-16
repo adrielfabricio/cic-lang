@@ -19,6 +19,8 @@ export const stateTransitions: StateTransitions = {
       ? State.Q6
       : char === '"'
       ? State.Q19
+      : char === "#"
+      ? State.Q22
       : State.Q0,
     token: NUMERIC.includes(char)
       ? Token.UNKNOWN
@@ -132,5 +134,13 @@ export const stateTransitions: StateTransitions = {
   [State.Q21]: () => ({
     nextState: State.Q0,
     token: Token.TK_CADEIA,
+  }),
+  [State.Q22]: (char) => ({
+    nextState: char !== "\n" ? State.Q23 : State.Q0,
+    token: Token.TK_SIMPLE_COMMENT,
+  }),
+  [State.Q23]: (char) => ({
+    nextState: char !== "\n" ? State.Q23 : State.Q0,
+    token: Token.TK_SIMPLE_COMMENT,
   }),
 };

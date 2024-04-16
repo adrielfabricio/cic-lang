@@ -60,6 +60,10 @@ class Automaton {
       this.iterationWithError = false;
       this.rowBuffer += char;
 
+      if (this.rowBuffer.includes("#") && char !== "\n") {
+        continue;
+      }
+
       if (char === "\n" || char === " ") {
         this.processCurrentToken();
         if (char === "\n") this.resetForNewLine();
@@ -185,7 +189,7 @@ class Automaton {
    * Processa o token atual.
    */
   private processCurrentToken(): void {
-    if (!this.iterationWithError) {
+    if (!this.iterationWithError && !(this.token === Token.UNKNOWN)) {
       this.setTokenUsageCount(this.token);
       writeTokenToFile({
         row: this.currentRow,

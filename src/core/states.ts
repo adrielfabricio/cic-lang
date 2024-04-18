@@ -4,8 +4,6 @@ import { State, Token } from "../utils/enums";
 
 /**
  * INITIAL_STATE: Q0
- * TK_INT: Q0 -> Q1 -> Q2 -> Q3 -> Q4 -> Q5
- * TK_END: Q0 -> Q1 -> Q12 -> Q13
  */
 export const stateTransitions: StateTransitions = {
   [State.Q0]: (char) => ({
@@ -41,8 +39,16 @@ export const stateTransitions: StateTransitions = {
   }),
   [State.Q2]: (char) => ({
     nextState:
-      char === "." ? State.Q6 : !NUMERIC.includes(char) ? State.Q5 : State.Q3,
-    token: Token.TK_INT,
+      char === "."
+        ? State.Q6
+        : char === "_"
+        ? State.Q24
+        : char === "/"
+        ? State.Q27
+        : !NUMERIC.includes(char)
+        ? State.Q5
+        : State.Q3,
+    token: char === "_" || char === "/" ? Token.UNKNOWN : Token.TK_INT,
   }),
   [State.Q3]: (char) => ({
     nextState:
@@ -142,5 +148,50 @@ export const stateTransitions: StateTransitions = {
   [State.Q23]: (char) => ({
     nextState: char !== "\n" ? State.Q23 : State.Q0,
     token: Token.TK_SIMPLE_COMMENT,
+  }),
+  [State.Q24]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q25 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q25]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q26 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q26]: (char) => ({
+    nextState: char === "_" ? State.Q30 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q27]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q28 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q28]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q29 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q29]: (char) => ({
+    nextState: char === "/" ? State.Q30 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q30]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q31 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q31]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q32 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q32]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q33 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  [State.Q33]: (char) => ({
+    nextState: NUMERIC.includes(char) ? State.Q34 : State.Q0,
+    token: Token.TK_DATA,
+  }),
+  // TK_DATA acceptance state
+  [State.Q34]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_DATA,
   }),
 };

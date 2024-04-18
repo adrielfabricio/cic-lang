@@ -83,15 +83,23 @@ class Automaton {
         const transition = stateTransitions[this.currentState](char);
         this.previousState = this.currentState;
         this.currentState = transition.nextState;
-
         if (this.checkAcceptanceState()) {
           this.token = transition.token;
           unrecognizedCharFlag = false;
+          console.log(transition.token);
         } else if (transition.token !== Token.UNKNOWN) {
           this.token = transition.token;
-        } else if (!unrecognizedCharFlag) {
+        } else if (
+          !unrecognizedCharFlag &&
+          this.currentState !== State.Q30 &&
+          this.currentState !== State.Q31 &&
+          this.currentState !== State.Q32 &&
+          this.currentState !== State.Q33 &&
+          this.currentState !== State.Q34
+        ) {
           unrecognizedCharFlag = true;
         }
+        console.log(transition);
       }
     }
 
@@ -109,7 +117,8 @@ class Automaton {
         this.previousState === State.Q10 || // TK_FLOAT
         this.previousState === State.Q14 || // TK_END
         this.previousState === State.Q18 || // TK_ID
-        this.previousState === State.Q21) // TK_CADEIA
+        this.previousState === State.Q21 || // TK_CADEIA
+        this.previousState === State.Q34) // TK_DATA
     );
   }
 

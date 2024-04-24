@@ -6,6 +6,30 @@ enum Token {
   TK_CADEIA = "TK_CADEIA",
   TK_DATA = "TK_DATA",
   TK_SIMPLE_COMMENT = "TK_SIMPLE_COMMENT",
+  TK_PLUS = "TK_+",
+  TK_MINUS = "TK_-",
+  TK_MULT = "TK_*",
+  TK_DIV = "TK_%",
+  TK_NEG = "TK_~",
+  TK_AND = "TK_&",
+  TK_OR = "TK_|",
+  TK_DIFF = "TK_<>",
+  TK_EQUAL = "TK_==",
+  TK_LESS = "TK_<",
+  TK_LESS_EQUAL = "TK_<=",
+  TK_GREATER = "TK_>",
+  TK_GREATER_EQUAL = "TK_>=",
+  TK_ASSIGN = "TK_<==",
+  TK_OPEN_PAR = "TK_(",
+  TK_CLOSE_PAR = "TK_)",
+  TK_IMPRIMA = "TK_IMPRIMA",
+  TK_LEIA = "TK_LEIA",
+  TK_SE = "TK_SE",
+  TK_SENAO = "TK_SENAO",
+  TK_PARA = "TK_PARA",
+  TK_ENQUANTO = "TK_ENQUANTO",
+  TK_ROTINA = "TK_ROTINA",
+  TK_FIM_ROTINA = "TK_FIM_ROTINA",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -45,10 +69,40 @@ enum State {
   Q32 = "q32",
   Q33 = "q33",
   Q34 = "q34",
+  Q35 = "q35",
+  Q36 = "q36",
+  Q37 = "q37",
+  Q38 = "q38",
+  Q39 = "q39",
+  Q40 = "q40",
+  Q41 = "q41",
+  Q42 = "q42",
+  Q43 = "q43",
+  Q44 = "q44",
+  Q45 = "q45",
+  Q46 = "q46",
+  Q47 = "q47",
+  Q48 = "q48",
+  Q49 = "q49",
+  Q50 = "q50",
+  Q51 = "q51",
+  Q52 = "q52",
+  Q53 = "q53",
 }
 
 enum Error {
   UNRECOGNIZED_TOKEN = "unrecognized token",
 }
 
-export { Token, State, Error };
+enum ReservedWords {
+  ROUTINE = "rotina",
+  END_ROUTINE = "fim_rotina",
+  IF = "se",
+  ELSE = "senao",
+  PRINT = "imprima",
+  READ = "leia",
+  FOR = "para",
+  WHILE = "enquanto",
+}
+
+export { Token, State, Error, ReservedWords };

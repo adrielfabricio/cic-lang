@@ -19,6 +19,30 @@ export const stateTransitions: StateTransitions = {
       ? State.Q19
       : char === "#"
       ? State.Q22
+      : char === "("
+      ? State.Q35
+      : char === ")"
+      ? State.Q36
+      : char === "|"
+      ? State.Q37
+      : char === "&"
+      ? State.Q38
+      : char === "%"
+      ? State.Q39
+      : char === "*"
+      ? State.Q40
+      : char === "-"
+      ? State.Q41
+      : char === "+"
+      ? State.Q42
+      : char === "~"
+      ? State.Q43
+      : char === "="
+      ? State.Q44
+      : char === "<"
+      ? State.Q46
+      : char === ">"
+      ? State.Q51
       : State.Q0,
     token: NUMERIC.includes(char)
       ? Token.UNKNOWN
@@ -35,7 +59,7 @@ export const stateTransitions: StateTransitions = {
         : !NUMERIC.includes(char)
         ? State.Q5
         : State.Q2,
-    token: Token.UNKNOWN,
+    token: !NUMERIC.includes(char) ? Token.TK_INT : Token.UNKNOWN,
   }),
   [State.Q2]: (char) => ({
     nextState:
@@ -193,5 +217,97 @@ export const stateTransitions: StateTransitions = {
   [State.Q34]: () => ({
     nextState: State.Q0,
     token: Token.TK_DATA,
+  }),
+  // TK_OPEN_PAR acceptance state
+  [State.Q35]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_OPEN_PAR,
+  }),
+  // TK_CLOSE_PAR acceptance state
+  [State.Q36]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_CLOSE_PAR,
+  }),
+  // TK_OR acceptance state
+  [State.Q37]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_OR,
+  }),
+  // TK_AND acceptance state
+  [State.Q38]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_AND,
+  }),
+  // TK_DIV acceptance state
+  [State.Q39]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_DIV,
+  }),
+  // TK_MULT acceptance state
+  [State.Q40]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_MULT,
+  }),
+  // TK_MINUS acceptance state
+  [State.Q41]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_MINUS,
+  }),
+  // TK_PLUS acceptance state
+  [State.Q42]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_PLUS,
+  }),
+  // TK_NEG acceptance state
+  [State.Q43]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_NEG,
+  }),
+  [State.Q44]: (char) => ({
+    nextState: char === "=" ? State.Q45 : State.Q0,
+    token: Token.UNKNOWN,
+  }),
+  // TK_EQUAL acceptance state
+  [State.Q45]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_EQUAL,
+  }),
+  [State.Q46]: (char) => ({
+    nextState: char === "=" ? State.Q48 : char === ">" ? State.Q50 : State.Q47,
+    token: char !== "=" && char !== ">" ? Token.TK_LESS : Token.UNKNOWN,
+  }),
+  // TK_LESS acceptance state
+  [State.Q47]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_LESS,
+  }),
+  // TK_LESS_EQUAL acceptance state
+  [State.Q48]: (char) => ({
+    nextState: char === "=" ? State.Q49 : State.Q0,
+    token: char === "=" ? Token.UNKNOWN : Token.TK_LESS_EQUAL,
+  }),
+  // TK_ASSIGN acceptance state
+  [State.Q49]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_ASSIGN,
+  }),
+  // TK_DIFF acceptance state
+  [State.Q50]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_DIFF,
+  }),
+  [State.Q51]: (char) => ({
+    nextState: char === "=" ? State.Q53 : State.Q52,
+    token: Token.UNKNOWN,
+  }),
+  // TK_GREATER acceptance state
+  [State.Q52]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_GREATER,
+  }),
+  // TK_GREATER_EQUAL acceptance state
+  [State.Q53]: () => ({
+    nextState: State.Q0,
+    token: Token.TK_GREATER_EQUAL,
   }),
 };

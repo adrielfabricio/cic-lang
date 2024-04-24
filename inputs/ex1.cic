@@ -1,0 +1,6 @@
+rotina
+	imprima("Digite um numero")
+	leia(nUmErO)
+	nUm <== nUm <> 123
+	imprima(123.10e10)
+fim_rotina

@@ -5,6 +5,7 @@ import {
   writeTokenToFile,
   writeTokenUsageToFile,
 } from "../utils/files";
+import { RESERVED_WORDS } from "../config/constants";
 
 /**
  * Classe que representa um autômato finito determinístico para reconhecimento de tokens.
@@ -64,6 +65,11 @@ class Automaton {
         continue;
       }
 
+      if (RESERVED_WORDS.includes(this.rowBuffer)) {
+        console.log(this.rowBuffer);
+        this.token = Token[`TK_${this.rowBuffer.toUpperCase()}`];
+      }
+
       if (char === "\n" || char === " ") {
         this.processCurrentToken();
         if (char === "\n") this.resetForNewLine();
@@ -87,8 +93,6 @@ class Automaton {
           this.token = transition.token;
           unrecognizedCharFlag = false;
           console.log(transition.token);
-        } else if (transition.token !== Token.UNKNOWN) {
-          this.token = transition.token;
         } else if (
           !unrecognizedCharFlag &&
           this.currentState !== State.Q30 &&
@@ -99,7 +103,6 @@ class Automaton {
         ) {
           unrecognizedCharFlag = true;
         }
-        console.log(transition);
       }
     }
 

@@ -65,11 +65,6 @@ class Automaton {
         continue;
       }
 
-      if (RESERVED_WORDS.includes(this.rowBuffer)) {
-        console.log(this.rowBuffer);
-        this.token = Token[`TK_${this.rowBuffer.toUpperCase()}`];
-      }
-
       if (char === "\n" || char === " ") {
         this.processCurrentToken();
         if (char === "\n") this.resetForNewLine();
@@ -78,6 +73,10 @@ class Automaton {
         this.currentCol++;
         this.currentValue += char;
         this.currentTokenValue += char;
+      }
+
+      if (RESERVED_WORDS.includes(this.rowBuffer)) {
+        this.token = Token[`TK_${this.rowBuffer.toUpperCase()}`];
       }
 
       if (this.checkErrorState(unrecognizedCharFlag)) {

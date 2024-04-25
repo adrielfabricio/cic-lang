@@ -1,7 +1,16 @@
 # cic-lang
 
-Implementação da linguagem cic. Este guia ajuda a configurar e executar programas `cic`.
-Os tokens de retorno escolhidos foram o TK_END e TK_ID.
+Este repositório contém a implementação de um analisador léxico em TypeScript. O analisador é capaz de processar código-fonte e identificar tokens conforme definido pela gramática da linguagem de programação. O lexer suporta identificação de palavras reservadas, operadores, delimitadores, identificadores, números inteiros e de ponto flutuante, cadeias de caracteres, entre outros.
+
+## Funcionalidades
+
+- **Reconhecimento de Tokens:** Capaz de diferenciar e classificar diversos tipos de tokens, incluindo palavras reservadas, operadores, delimitadores, números e identificadores.
+
+- **Contagem de Uso de Tokens:** Mantém uma contagem de quantas vezes cada token é utilizado no código-fonte.
+
+- **Tratamento de Erros:** Identifica e registra erros relacionados a tokens malformados ou não reconhecidos.
+
+- **Suporte a Comentários:** Ignora comentários de linha única e de múltiplas linhas durante a análise.
 
 ## Iniciando
 
@@ -59,8 +68,7 @@ cic-lang/
 │
 ├── src/                      # Código fonte do projeto
 │   ├── core/                 # Núcleo da implementação da linguagem
-│   │   ├── automaton.ts      # Autômato para análise sintática
-│   │   └── states.ts         # Estados utilizados pelo autômato
+│   │   └── lexer.ts          # Analisador léxico da linguagem
 │   │
 │   ├── utils/                # Utilitários gerais
 │   │   └── constants.ts      # Constantes globais
@@ -71,11 +79,7 @@ cic-lang/
 │   └── app.ts                # Ponto de entrada da aplicação
 │
 ├── inputs/                   # Inputs de código na linguagem "cic"
-│   ├── tk_end.cic            # Arquivo simulando diversos TK_END
-│   │
-│   ├── tk_id.cic             # Arquivo simulando diversos TK_ID
-│   │
-│   └── tk_error.cic          # Arquivo simulando erro
+│   └── ex1.cic               # Exemplo utilizado para construir o analisador
 │
 ├── outputs/                  # Outputs da execução do autômato
 │   ├── error.txt             # Arquivo contendo possíveis erros
@@ -90,3 +94,7 @@ cic-lang/
 └── tsconfig.json             # Configuração do TypeScript
 
 ```
+
+## Licença
+
+O projeto é licenciado sob a MIT License.

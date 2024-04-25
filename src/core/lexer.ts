@@ -1,4 +1,4 @@
-import { Token } from "../types/types";
+import { Error, Token } from "../types/types";
 import {
   writeErrorToFile,
   writeTokenToFile,
@@ -9,19 +9,22 @@ import {
  * Classe que representa um analisador léxico.
  */
 class Lexer {
+  // A lista de tokens reconhecidos
   private tokens: Array<Token> = [];
+  // O token atual
   private token: string = "";
+  // O número da linha atual
   private currentRow: number = 0;
+  // O número da coluna atual
   private currentCol: number = 0;
+  // A linha de código atual
   private currentCodeLine: string = "";
+  // O número de vezes que cada token foi utilizado
   private tokenUsageCount: { [key: string]: string } = {};
-  private errors: Array<{
-    message: string;
-    row: number;
-    col: number;
-    codeLine: string;
-  }> = [];
+  // A lista de erros
+  private errors: Array<Error> = [];
 
+  // Palavras reservadas
   private static RESERVED_WORDS: { [key: string]: string } = {
     rotina: "TK_ROUTINE",
     fim_rotina: "TK_END_ROUTINE",
@@ -33,6 +36,7 @@ class Lexer {
     enquanto: "TK_WHILE",
   };
 
+  // Operadores
   private static OPERATORS: { [key: string]: string } = {
     "+": "TK_PLUS",
     "-": "TK_MINUS",
@@ -51,6 +55,7 @@ class Lexer {
     "<>": "TK_NEQUAL",
   };
 
+  // Delimitadores
   private static DELIMITERS: { [key: string]: string } = {
     "(": "TK_LPAREN",
     ")": "TK_RPAREN",
@@ -79,35 +84,70 @@ class Lexer {
   private static isFloat(token: string): boolean {
     let pointSeen = false;
     let eSeen = false;
-    let digitSeenBeforeE = false;
-    let digitSeenAfterE = false;
+    let digitCountBeforePoint = 0;
+    let digitSeenAfterPoint = false;
+    let inExponentPart = false;
 
     for (let i = 0; i < token.length; i++) {
-      if (token[i] >= "0" && token[i] <= "9") {
-        if (!eSeen) digitSeenBeforeE = true;
-        else digitSeenAfterE = true;
-      } else if (token[i] === "." && !pointSeen && !eSeen) {
+      const char = token[i];
+
+      if (char === ".") {
+        if (pointSeen || eSeen) {
+          // Não pode ter mais de um ponto ou ponto depois de 'e'
+          return false;
+        }
         pointSeen = true;
-      } else if (
-        (token[i] === "e" || token[i] === "e-") &&
-        !eSeen &&
-        digitSeenBeforeE
-      ) {
+      } else if (char === "e" || char === "E") {
+        if (eSeen || (!digitCountBeforePoint && !digitSeenAfterPoint)) {
+          // 'e' deve vir depois de dígitos e apenas uma vez
+          return false;
+        }
         eSeen = true;
+        inExponentPart = true;
+        // Se o próximo caractere for '+' ou '-', apenas avance o índice
         if (
           i + 1 < token.length &&
           (token[i + 1] === "+" || token[i + 1] === "-")
         ) {
-          i++; // Skip the sign character directly after e
+          i++;
+        }
+      } else if (this.isDigit(char)) {
+        if (!eSeen) {
+          if (!pointSeen) {
+            digitCountBeforePoint++;
+            if (digitCountBeforePoint > 3) {
+              return false; // Não mais que 3 dígitos antes do ponto
+            }
+          } else {
+            digitSeenAfterPoint = true;
+          }
         }
       } else {
-        return false;
+        return false; // Caracteres inválidos
       }
     }
-    if (eSeen) {
-      return digitSeenBeforeE && digitSeenAfterE;
+
+    // Verifica se há pelo menos um dígito em posições válidas
+    if (!digitCountBeforePoint && !digitSeenAfterPoint) {
+      return false;
     }
-    return digitSeenBeforeE && (pointSeen || eSeen);
+
+    // Não pode terminar com 'e' ou ponto sem dígitos depois
+    if (
+      eSeen &&
+      (token[token.length - 1] === "e" ||
+        token[token.length - 1] === "E" ||
+        token[token.length - 1] === "+" ||
+        token[token.length - 1] === "-")
+    ) {
+      return false;
+    }
+
+    if (pointSeen && !digitSeenAfterPoint && token[token.length - 1] === ".") {
+      return false; // Caso como "123." sem dígitos após o ponto
+    }
+
+    return true;
   }
 
   /**
@@ -256,11 +296,12 @@ class Lexer {
 
       if (char === "\n") {
         if (inString) {
-          this.addError(
+          Lexer.addError(
             "Cadeia não fechada",
             this.currentRow,
             this.currentCol - this.token.length,
-            this.currentCodeLine
+            this.currentCodeLine,
+            this.errors
           );
 
           inString = false;
@@ -334,11 +375,12 @@ class Lexer {
             const result = Lexer.tokenize(this.token);
             if (result) this.recognizeToken(result);
             else
-              this.addError(
+              Lexer.addError(
                 "Token inválido",
                 this.currentRow,
                 this.currentCol - this.token.length,
-                this.currentCodeLine
+                this.currentCodeLine,
+                this.errors
               );
             this.token = "";
           }
@@ -351,11 +393,12 @@ class Lexer {
       const result = Lexer.tokenize(this.token);
       if (result) this.recognizeToken(result);
       else
-        this.addError(
+        Lexer.addError(
           "Token inválido ao final do arquivo",
           this.currentRow,
           this.currentCol - this.token.length,
-          this.currentCodeLine
+          this.currentCodeLine,
+          this.errors
         );
     }
 
@@ -391,13 +434,14 @@ class Lexer {
    * @param row O número da linha onde o erro ocorreu
    * @param col O número da coluna onde o erro ocorreu
    */
-  private addError(
+  private static addError(
     message: string,
     row: number,
     col: number,
-    codeLine: string
+    codeLine: string,
+    errors: Array<Error>
   ): void {
-    this.errors.push({ message, row, col, codeLine });
+    errors.push({ message, row, col, codeLine });
     writeErrorToFile({ message, row, col, codeLine });
   }
 

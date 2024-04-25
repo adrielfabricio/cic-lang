@@ -19,3 +19,19 @@ export const TOKEN_FILE_SEPARATOR = `+${"-".repeat(
 export const TOKEN_USAGE_FILE_SEPARATOR = `+${"-".repeat(
   TOKEN_USAGE_FILE_TABLE_DIMENSIONS.token
 )}+${"-".repeat(TOKEN_USAGE_FILE_TABLE_DIMENSIONS.use)}+\n`;
+
+// token constants
+export const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+export const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+export const NUMERIC = "0123456789";
+export const HEX_DIGITS = `${NUMERIC}ABCDEF`;
+export const RESERVED_WORDS = [
+  "rotina",
+  "fim_rotina",
+  "se",
+  "senao",
+  "imprima",
+  "leia",
+  "para",
+  "enquanto",
+];

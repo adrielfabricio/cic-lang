@@ -3,6 +3,9 @@ rotina
 	leia(nUmErO)
 	nUm <== nUm <> 123
 	imprima(123.10e10)
+	imprima(12.10e10)
+	imprima(.304e10)
+	imprima(1234.304e10)
 	imprima(11/11/2011)
 	se (3 < 2)
 		imprima("testes")

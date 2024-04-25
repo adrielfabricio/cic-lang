@@ -8,6 +8,7 @@ import {
   TOKEN_USAGE_FILE_SEPARATOR,
   TOKEN_USAGE_FILE_TABLE_DIMENSIONS,
 } from "../config/constants";
+import { TokenEnum } from "./enums";
 
 /**
  * Centraliza uma string em uma largura específica.

@@ -6,7 +6,7 @@ import { initializeOutputFiles } from "./utils/files";
 
 // Retrieve the input file path from command line arguments
 const inputFile = process.argv[2];
-const algorithm = process.argv[3] ?? "automaton";
+const algorithm = process.argv[3];
 
 // Validate the input file path
 if (!inputFile) {

@@ -3,10 +3,7 @@ rotina
 	leia(nUmErO)
 	nUm <== nUm <> 123
 	imprima(123.10e10)
-	# comentario simples
 	imprima(11/11/2011)
-	<<<
-		teste de
-		comentario multipla linha >>>
-	imprima(0xFA15)
+	se (3 < 2)
+		imprima("testes")
 fim_rotina

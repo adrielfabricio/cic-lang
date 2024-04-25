@@ -146,16 +146,26 @@ export function writeErrorsToFile(errors: string[]): void {
 }
 
 /**
- * Escreve detalhes do erro no arquivo de erros.
- * @param errorDetails Objeto contendo mensagem, linha e coluna do erro.
+ * Escreve um erro específico no arquivo error.txt.
+ * @param errorDetails Detalhes do erro a serem escritos no arquivo.
  */
 export function writeErrorToFile(errorDetails: {
   message: string;
   row: number;
   col: number;
+  codeLine: string;
 }): void {
+  console.log(errorDetails.col);
   const outputPath = resolve(ROOT_DIR, "outputs");
-  const errorString = `[${errorDetails.row}:${errorDetails.col}] Error: ${errorDetails.message}\n`;
+  let errorString = `[${errorDetails.row}] ${errorDetails.codeLine}\n`;
+  errorString +=
+    `${" ".repeat(`[${errorDetails.row}]`.length)}${"-".repeat(
+      errorDetails.col < 0 ? 1 : errorDetails.col
+    )}` +
+    "^" +
+    "\n";
+  errorString += `Erro linha ${errorDetails.row} coluna ${errorDetails.col}: ${errorDetails.message}\n`;
+
   appendFileSync(join(outputPath, "error.txt"), errorString, {
     encoding: "utf-8",
   });

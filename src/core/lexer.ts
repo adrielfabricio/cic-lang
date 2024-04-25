@@ -13,8 +13,14 @@ class Lexer {
   private token: string = "";
   private currentRow: number = 0;
   private currentCol: number = 0;
+  private currentCodeLine: string = "";
   private tokenUsageCount: { [key: string]: string } = {};
-  private errors: Array<{ message: string; row: number; col: number }> = [];
+  private errors: Array<{
+    message: string;
+    row: number;
+    col: number;
+    codeLine: string;
+  }> = [];
 
   private static RESERVED_WORDS: { [key: string]: string } = {
     rotina: "TK_ROUTINE",
@@ -170,13 +176,11 @@ class Lexer {
     if (token.length !== 10) {
       return false;
     }
-
     // Verifica se os delimitadores estão nas posições corretas
     const delimiter = token[2]; // Assume o delimitador com base no terceiro caractere
     if ((delimiter !== "/" && delimiter !== "_") || token[5] !== delimiter) {
       return false;
     }
-
     // Verifica se todos os outros caracteres são dígitos
     for (let i = 0; i < token.length; i++) {
       if (i === 2 || i === 5) {
@@ -186,10 +190,6 @@ class Lexer {
         return false;
       }
     }
-
-    // Opcional: Verificar a validade do valor da data (ex: mês entre 01 e 12)
-    // Isso pode ser feito aqui se necessário.
-
     return true; // Passou em todas as verificações
   }
 
@@ -199,45 +199,30 @@ class Lexer {
    * @returns O token reconhecido ou null se a string não for um token válido
    */
   private static tokenize(token: string): Token | null {
-    if (token in Lexer.RESERVED_WORDS) {
+    if (token in Lexer.RESERVED_WORDS)
       return { type: Lexer.RESERVED_WORDS[token], value: "" };
-    }
-    if (token in Lexer.OPERATORS) {
-      return { type: Lexer.OPERATORS[token], value: "" };
-    }
-    if (token in Lexer.DELIMITERS) {
-      return { type: Lexer.DELIMITERS[token], value: "" };
-    }
-    if (this.isInteger(token)) {
-      return { type: "TK_INT", value: token };
-    }
-    if (this.isFloat(token)) {
-      return { type: "TK_FLOAT", value: token };
-    }
-    if (token.startsWith("0x") && [...token.slice(2)].every(Lexer.isHexDigit)) {
-      return { type: "TK_END", value: token };
-    }
-    if (token.startsWith('"') && token.endsWith('"')) {
-      return { type: "TK_CADEIA", value: token.slice(1, -1) };
-    }
-    if (this.isIdentifier(token)) {
-      return { type: "TK_ID", value: token };
-    }
-    if (this.isDate(token)) {
-      return { type: "TK_DATA", value: token };
-    }
-    return null;
-  }
 
-  /**
-   * Adiciona um erro de análise léxica à lista de erros.
-   * @param message A mensagem de erro
-   * @param row O número da linha onde o erro ocorreu
-   * @param col O número da coluna onde o erro ocorreu
-   */
-  private addError(message: string, row: number, col: number): void {
-    this.errors.push({ message, row, col });
-    writeErrorToFile({ message, row, col });
+    if (token in Lexer.OPERATORS)
+      return { type: Lexer.OPERATORS[token], value: "" };
+
+    if (token in Lexer.DELIMITERS)
+      return { type: Lexer.DELIMITERS[token], value: "" };
+
+    if (this.isInteger(token)) return { type: "TK_INT", value: token };
+
+    if (this.isFloat(token)) return { type: "TK_FLOAT", value: token };
+
+    if (token.startsWith("0x") && [...token.slice(2)].every(Lexer.isHexDigit))
+      return { type: "TK_END", value: token };
+
+    if (token.startsWith('"') && token.endsWith('"'))
+      return { type: "TK_CADEIA", value: token.slice(1, -1) };
+
+    if (this.isIdentifier(token)) return { type: "TK_ID", value: token };
+
+    if (this.isDate(token)) return { type: "TK_DATA", value: token };
+
+    return null;
   }
 
   /**
@@ -249,28 +234,6 @@ class Lexer {
     this.currentCol = 0;
     this.tokenUsageCount = {};
     this.token = "";
-  }
-
-  /**
-   * Reconhece um token e o armazena na lista de tokens.
-   * @param token O token a ser reconhecido
-   */
-  private recognizeToken(token: Token): void {
-    if (this.tokenUsageCount[token.type]) {
-      this.tokenUsageCount[token.type] = (
-        parseInt(this.tokenUsageCount[token.type]) + 1
-      ).toString();
-    } else {
-      this.tokenUsageCount[token.type] = "1";
-    }
-
-    writeTokenToFile({
-      token: token.type,
-      value: token.value,
-      row: this.currentRow,
-      col: this.currentCol,
-    });
-    this.tokens.push(token);
   }
 
   /**
@@ -293,25 +256,34 @@ class Lexer {
 
       if (char === "\n") {
         if (inString) {
-          this.addError("Cadeia não fechada", this.currentRow, this.currentCol);
+          this.addError(
+            "Cadeia não fechada",
+            this.currentRow,
+            this.currentCol - this.token.length,
+            this.currentCodeLine
+          );
+
           inString = false;
         }
         inComment = false;
         this.currentRow++;
         this.currentCol = 0;
+        this.currentCodeLine = "";
         continue;
+      } else {
+        this.currentCol++;
+        this.currentCodeLine += char;
       }
 
       if (inMultiLineComment) {
-        if (text.substr(i, 3) === ">>>") {
+        if (text.substring(i, i + 3) === ">>>") {
           inMultiLineComment = false;
           i += 2; // Ajustar o índice para após o delimitador de fechamento
           this.currentCol += 2;
         }
         continue;
       }
-
-      if (!inString && !inComment && text.substr(i, 3) === "<<<") {
+      if (!inString && !inComment && text.substring(i, i + 3) === "<<<") {
         inMultiLineComment = true;
         i += 2; // Ajustar o índice para após o delimitador de abertura
         this.currentCol += 2;
@@ -340,6 +312,7 @@ class Lexer {
           this.token = "";
           continue;
         }
+
         if (inString) {
           this.token += char;
         } else if (Lexer.isOperatorOrDelimiter(char)) {
@@ -352,6 +325,25 @@ class Lexer {
         } else {
           this.token += char;
         }
+
+        if (
+          !inString &&
+          (char === " " || char === "\t" || Lexer.isOperatorOrDelimiter(char))
+        ) {
+          if (this.token.length > 0) {
+            const result = Lexer.tokenize(this.token);
+            if (result) this.recognizeToken(result);
+            else
+              this.addError(
+                "Token inválido",
+                this.currentRow,
+                this.currentCol - this.token.length,
+                this.currentCodeLine
+              );
+            this.token = "";
+          }
+          continue;
+        }
       }
     }
 
@@ -362,7 +354,8 @@ class Lexer {
         this.addError(
           "Token inválido ao final do arquivo",
           this.currentRow,
-          this.currentCol - this.token.length
+          this.currentCol - this.token.length,
+          this.currentCodeLine
         );
     }
 
@@ -370,6 +363,50 @@ class Lexer {
     return this.tokens;
   }
 
+  /**
+   * Reconhece um token e o armazena na lista de tokens.
+   * @param token O token a ser reconhecido
+   */
+  private recognizeToken(token: Token): void {
+    if (this.tokenUsageCount[token.type]) {
+      this.tokenUsageCount[token.type] = (
+        parseInt(this.tokenUsageCount[token.type]) + 1
+      ).toString();
+    } else {
+      this.tokenUsageCount[token.type] = "1";
+    }
+
+    writeTokenToFile({
+      token: token.type,
+      value: token.value,
+      row: this.currentRow,
+      col: this.currentCol,
+    });
+    this.tokens.push(token);
+  }
+
+  /**
+   * Adiciona um erro de análise léxica à lista de erros.
+   * @param message A mensagem de erro
+   * @param row O número da linha onde o erro ocorreu
+   * @param col O número da coluna onde o erro ocorreu
+   */
+  private addError(
+    message: string,
+    row: number,
+    col: number,
+    codeLine: string
+  ): void {
+    this.errors.push({ message, row, col, codeLine });
+    writeErrorToFile({ message, row, col, codeLine });
+  }
+
+  /**
+   * Manipula operadores e delimitadores.
+   * @param char O caractere a ser manipulado
+   * @param i O índice do caractere na entrada
+   * @param text A entrada a ser processada
+   */
   private handleOperatorsAndDelimiters(
     char: string,
     i: number,
@@ -392,12 +429,7 @@ class Lexer {
     }
     const result = Lexer.tokenize(this.token);
     if (result) this.recognizeToken(result);
-    else
-      this.addError(
-        "Token inválido",
-        this.currentRow,
-        this.currentCol - this.token.length
-      );
+
     this.token = "";
   }
 }

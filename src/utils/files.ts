@@ -1,10 +1,10 @@
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 
-import { Token } from "./enums";
 import { ROOT_DIR, TABLE_DIMENSIONS } from "../config/constants";
 
-const SEPARATOR = "+----------+----------+------------+-------------+\n";
+const SEPARATOR =
+  "+----------+----------+-------------+-------------------------+\n";
 
 /**
  * Centraliza uma string em uma largura específica.
@@ -78,7 +78,7 @@ export function initializeOutputFiles() {
 export function writeTokenToFile(payload: {
   row: number;
   col: number;
-  token: Token;
+  token: string;
   value: string;
 }) {
   const { row, col, token, value } = payload;
@@ -99,13 +99,16 @@ export function writeTokenToFile(payload: {
 /**
  * Escreve a contagem de uso de cada token em um arquivo de saída.
  * @param tokenUsage A contagem de uso de cada token.
- * !TODO: ordenate by quantity of usage
  */
-export function writeTokenUsageToFile(tokenUsage: { [key in Token]?: number }) {
+export function writeTokenUsageToFile(tokenUsage: { [key: string]: string }) {
   const outputPath = resolve(ROOT_DIR, "outputs");
+  // Convert tokenUsage to an array of [token, count] pairs
+  const entries = Object.entries(tokenUsage);
+  // Sort the entries by count, in descending order
+  entries.sort((a, b) => parseInt(b[1]) - parseInt(a[1]));
 
   let data = "";
-  for (const [token, count] of Object.entries(tokenUsage)) {
+  for (const [token, count] of entries) {
     data +=
       `|${centerString(token, TABLE_DIMENSIONS.row)}|${centerString(
         count.toString(),
@@ -113,10 +116,7 @@ export function writeTokenUsageToFile(tokenUsage: { [key in Token]?: number }) {
       )}|\n` + "+----------+----------+\n";
   }
 
-  if (!existsSync(outputPath)) {
-    mkdirSync(outputPath, { recursive: true });
-  }
-
+  if (!existsSync(outputPath)) mkdirSync(outputPath, { recursive: true });
   appendFileSync(join(outputPath, "token_usage.txt"), data, {
     encoding: "utf-8",
   });
@@ -131,6 +131,22 @@ export function writeErrorsToFile(errors: string[]): void {
   const errorContent = errors.join("\n");
 
   appendFileSync(join(outputPath, "error.txt"), errorContent, {
+    encoding: "utf-8",
+  });
+}
+
+/**
+ * Escreve detalhes do erro no arquivo de erros.
+ * @param errorDetails Objeto contendo mensagem, linha e coluna do erro.
+ */
+export function writeErrorToFile(errorDetails: {
+  message: string;
+  row: number;
+  col: number;
+}): void {
+  const outputPath = resolve(ROOT_DIR, "outputs");
+  const errorString = `[${errorDetails.row}:${errorDetails.col}] Error: ${errorDetails.message}\n`;
+  appendFileSync(join(outputPath, "error.txt"), errorString, {
     encoding: "utf-8",
   });
 }

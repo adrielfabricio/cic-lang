@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { extname, join } from "path";
-import { automaton } from "./core/automaton";
+import { lexer } from "./core/lexer";
 import { initializeOutputFiles } from "./utils/files";
 
 // Retrieve the input file path from command line arguments
@@ -25,10 +25,10 @@ const inputContent = readFileSync(inputFile, "utf8");
 const outputDir = join(__dirname, "outputs");
 if (!existsSync(outputDir)) initializeOutputFiles();
 
-// Process the input content through the automaton
-console.time("automaton.processInput");
-automaton.processInput(inputContent);
-console.timeEnd("automaton.processInput");
+// Process the input content through the lexer
+console.time("lexer.processInput");
+lexer.processInput(inputContent);
+console.timeEnd("lexer.processInput");
 
-// Reset the automaton state for processing the next input
-automaton.reset();
+// Reset the lexer state for processing the next input
+lexer.reset();

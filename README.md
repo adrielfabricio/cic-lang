@@ -68,9 +68,15 @@ cic-lang/
 │
 ├── src/                      # Código fonte do projeto
 │   ├── core/                 # Núcleo da implementação da linguagem
+│   │   ├── automaton.ts      # Autômato
+│   │   │
+│   │   ├── states.ts         # Mudanças de estado
+│   │   │
 │   │   └── lexer.ts          # Analisador léxico da linguagem
 │   │
 │   ├── utils/                # Utilitários gerais
+│   │   ├── enums.ts          # Enumeradores
+│   │   │
 │   │   └── constants.ts      # Constantes globais
 │   │
 │   ├── types/                # Definições de tipos

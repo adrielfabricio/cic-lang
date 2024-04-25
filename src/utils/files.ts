@@ -1,10 +1,13 @@
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 
-import { ROOT_DIR, TABLE_DIMENSIONS } from "../config/constants";
-
-const SEPARATOR =
-  "+----------+----------+-------------+-------------------------+\n";
+import {
+  ROOT_DIR,
+  TOKEN_FILE_TABLE_DIMENSIONS,
+  TOKEN_FILE_SEPARATOR,
+  TOKEN_USAGE_FILE_SEPARATOR,
+  TOKEN_USAGE_FILE_TABLE_DIMENSIONS,
+} from "../config/constants";
 
 /**
  * Centraliza uma string em uma largura específica.
@@ -39,22 +42,23 @@ export function initializeOutputFiles() {
   }
 
   const tokenListHeader =
-    SEPARATOR +
-    `|${centerString("LIN", TABLE_DIMENSIONS.row)}|${centerString(
+    TOKEN_FILE_SEPARATOR +
+    `|${centerString("LIN", TOKEN_FILE_TABLE_DIMENSIONS.row)}|${centerString(
       "COL",
-      TABLE_DIMENSIONS.col
-    )}|${centerString("TOKEN", TABLE_DIMENSIONS.token)}|${centerString(
-      "LEXEMA",
-      TABLE_DIMENSIONS.lexeme
-    )}|\n` +
-    SEPARATOR;
+      TOKEN_FILE_TABLE_DIMENSIONS.col
+    )}|${centerString(
+      "TOKEN",
+      TOKEN_FILE_TABLE_DIMENSIONS.token
+    )}|${centerString("LEXEMA", TOKEN_FILE_TABLE_DIMENSIONS.lexeme)}|\n` +
+    TOKEN_FILE_SEPARATOR;
+
   const tokenUsageHeader =
-    "+----------+----------+\n" +
-    `|${centerString("TOKEN", TABLE_DIMENSIONS.row)}|${centerString(
-      "USO",
-      TABLE_DIMENSIONS.col
-    )}|\n` +
-    "+----------+----------+\n";
+    TOKEN_USAGE_FILE_SEPARATOR +
+    `|${centerString(
+      "TOKEN",
+      TOKEN_USAGE_FILE_TABLE_DIMENSIONS.token
+    )}|${centerString("USO", TOKEN_USAGE_FILE_TABLE_DIMENSIONS.use)}|\n` +
+    TOKEN_USAGE_FILE_SEPARATOR;
 
   writeFileSync(tokenListOutput, tokenListHeader, {
     encoding: "utf-8",
@@ -83,13 +87,16 @@ export function writeTokenToFile(payload: {
 }) {
   const { row, col, token, value } = payload;
   const tokenData =
-    `|${centerString(row.toString(), TABLE_DIMENSIONS.row)}|${centerString(
+    `|${centerString(
+      row.toString(),
+      TOKEN_FILE_TABLE_DIMENSIONS.row
+    )}|${centerString(
       col.toString(),
-      TABLE_DIMENSIONS.col
-    )}|${centerString(token, TABLE_DIMENSIONS.token)}|${centerString(
+      TOKEN_FILE_TABLE_DIMENSIONS.col
+    )}|${centerString(token, TOKEN_FILE_TABLE_DIMENSIONS.token)}|${centerString(
       value,
-      TABLE_DIMENSIONS.lexeme
-    )}|\n` + SEPARATOR;
+      TOKEN_FILE_TABLE_DIMENSIONS.lexeme
+    )}|\n` + TOKEN_FILE_SEPARATOR;
 
   appendFileSync(join(ROOT_DIR, "outputs", "token_list.txt"), tokenData, {
     encoding: "utf-8",
@@ -110,10 +117,13 @@ export function writeTokenUsageToFile(tokenUsage: { [key: string]: string }) {
   let data = "";
   for (const [token, count] of entries) {
     data +=
-      `|${centerString(token, TABLE_DIMENSIONS.row)}|${centerString(
+      `|${centerString(
+        token,
+        TOKEN_USAGE_FILE_TABLE_DIMENSIONS.token
+      )}|${centerString(
         count.toString(),
-        TABLE_DIMENSIONS.col
-      )}|\n` + "+----------+----------+\n";
+        TOKEN_USAGE_FILE_TABLE_DIMENSIONS.use
+      )}|\n` + TOKEN_USAGE_FILE_SEPARATOR;
   }
 
   if (!existsSync(outputPath)) mkdirSync(outputPath, { recursive: true });

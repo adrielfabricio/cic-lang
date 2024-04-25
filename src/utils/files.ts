@@ -156,7 +156,6 @@ export function writeErrorToFile(errorDetails: {
   col: number;
   codeLine: string;
 }): void {
-  console.log(errorDetails.col);
   const outputPath = resolve(ROOT_DIR, "outputs");
   let errorString = `[${errorDetails.row}] ${errorDetails.codeLine}\n`;
   errorString +=

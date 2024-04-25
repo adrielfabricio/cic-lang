@@ -92,7 +92,6 @@ class Automaton {
         if (this.checkAcceptanceState()) {
           this.token = transition.token;
           unrecognizedCharFlag = false;
-          console.log(transition.token);
         } else if (
           !unrecognizedCharFlag &&
           this.currentState !== StateEnum.Q30 &&
